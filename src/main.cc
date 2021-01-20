@@ -1,4 +1,5 @@
 #include "program.hh"
+#include "plane.hh"
 #include <iostream>
 #include <cmath>
 #include <fstream>
@@ -10,6 +11,8 @@
 #include <GL/freeglut.h>
 #include <glm/glm.hpp>
 
+Plane *plane;
+
 void window_resize(int width, int height) {
     glViewport(0,0,width,height);TEST_OPENGL_ERROR();
 }
@@ -17,7 +20,7 @@ void window_resize(int width, int height) {
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
 //  RENDER HERE
-//    vfx->render();
+    plane->render();
     glutSwapBuffers();
 }
 
@@ -36,7 +39,7 @@ void init_glut(int &argc, char *argv[]) {
     glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH);
     glutInitWindowSize(1024, 1024);
     glutInitWindowPosition ( 100, 100 );
-    glutCreateWindow("Particle systems");
+    glutCreateWindow("Grassy grass");
     glutDisplayFunc(display);
     glutTimerFunc(1000/60, timer, 0);
     glutReshapeFunc(window_resize);
@@ -85,6 +88,16 @@ int main(int argc, char* argv[])
     init_GL();
     std::string vertex_src = load("shaders/Vertex.shd");
     std::string fragment_src = load("shaders/Fragment.shd");
+    std::string grass_vertex_src = "";
+    std::string grass_fragment_src = "";
+    std::string grass_tessel_src = "";
+    std::string grass_geo_src = "";
+    std::string texture_path = "textures/grass.png";
+
+    plane = new Plane(1, vertex_src, fragment_src, grass_vertex_src,
+            grass_fragment_src, grass_tessel_src, grass_geo_src, texture_path);
+
+    plane->init_vao();
 
     std::cout << glutGet(GLUT_WINDOW_WIDTH) << " " << glutGet(GLUT_WINDOW_HEIGHT) << "\n";
     glutMainLoop();

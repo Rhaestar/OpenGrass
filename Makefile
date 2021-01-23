@@ -8,19 +8,18 @@
 
 CC = g++
 
-CPP_FILES = src/program.cc src/plane.cc
+CPP_FILES = src/program.cc src/plane.cc src/lodepng.cc src/main.cc
 HXX_FILES =
 OBJ_FILES = $(CPP_FILES:.cc=.o)
 
-CXX_FLAGS = -Wall -Wextra -Ofast -g -std=c++11 -I include/
-CXX_FLAGS += $(shell sdl2-config --cflags)
+CXX_FLAGS = -Wall -Wextra -g -std=c++11 -I include/
+CXX_FLAGS +=
 CXX_FLAGS += #-m64 -march=native
 CXX_FLAGS += #-fopt-info-vec-optimized #-fopt-info-vec-missed -ftree-vectorize
 
-LDXX_FLAGS = -lGL -lGLEW -lglut $(shell sdl2-config --libs) -lSDL2_image
+LDXX_FLAGS = -lGL -lGLEW -lglut
 
 DIST = main
-MAIN_FILE=src/main.o
 
 all: build
 

@@ -92,10 +92,10 @@ int main(int argc, char* argv[])
     std::string grass_fragment_src = "";
     std::string grass_tessel_src = "";
     std::string grass_geo_src = "";
-    std::string texture_path = "textures/grass.png";
+    std::string texture_path = "textures/grass32.png";
 
-    plane = new Plane(1, vertex_src, fragment_src, grass_vertex_src,
-            grass_fragment_src, grass_tessel_src, grass_geo_src, texture_path);
+    plane = new Plane{1, vertex_src, fragment_src, grass_vertex_src,
+            grass_fragment_src, grass_tessel_src, grass_geo_src, texture_path};
 
     plane->init_vao();
 

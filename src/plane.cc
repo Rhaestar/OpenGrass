@@ -1,24 +1,32 @@
 #include "plane.hh"
 
-//#include <SDL.h>
-//#include <SDL_image.h>
-
 Plane::Plane(float scale_, std::string& vertex, std::string& fragment,
         std::string& grassVertex, std::string grassFragment,
         std::string& tesselation, std::string& geometry,
         std::string& texture)
     : scale(scale_)
 {
-    GLuint test;
     plane_pid = make_program(vertex, fragment);
     //    grass_pid = make_program(grassVertex, grassFragment);
     //
-    int width, height, channels;
+    std::vector<unsigned char> image;
+    unsigned width, height;
+    unsigned error = lodepng::decode(image, width, height, texture);
+    std::cout << width << " " << height << "\n";
+    std::cout << (int)*(&image[0]) << "\n";
+    std::cout << (int)*(&image[1]) << "\n";
+    std::cout << (int)*(&image[2]) << "\n";
+
     //unsigned char *texture_data = stbi_load(texture.c_str(), &width, &height, &channels, 0);
 
     glGenTextures(1, &texture_id); TEST_OPENGL_ERROR();
     glBindTexture(GL_TEXTURE_2D, texture_id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data); TEST_OPENGL_ERROR();
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]); TEST_OPENGL_ERROR();
+
 
     //stbi_image_free(texture_data);
 }
@@ -28,12 +36,12 @@ void init_vao();
 
 void Plane::init_vao()
 {
-    static float quadpos[12] = {0.9f,  0.9f,
-                               -0.9f,  0.9f,
-                                0.9f, -0.9f,
-                                0.9f, -0.9f,
-                               -0.9f, -0.9f,
-                               -0.9f,  0.9f,};
+    static float quadpos[12] = {1.0f,  1.0f,
+                               -1.0f,  1.0f,
+                                1.0f, -1.0f,
+                                1.0f, -1.0f,
+                               -1.0f, -1.0f,
+                               -1.0f,  1.0f,};
 
 
     glGenVertexArrays(1, &vao_id); TEST_OPENGL_ERROR();
@@ -52,6 +60,7 @@ void Plane::render()
     //Draw plane
     glUseProgram(plane_pid); TEST_OPENGL_ERROR();
     glClear(GL_COLOR_BUFFER_BIT);
+    glBindTexture(GL_TEXTURE_2D, texture_id); TEST_OPENGL_ERROR();
     glBindVertexArray(vao_id); TEST_OPENGL_ERROR();
     glDrawArrays(GL_TRIANGLES, 0, 6); TEST_OPENGL_ERROR();
 

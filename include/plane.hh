@@ -2,6 +2,7 @@
 
 #include "test.hh"
 #include "program.hh"
+#include "lodepng.hh"
 
 #include <GL/freeglut.h>
 #include <cstdlib>

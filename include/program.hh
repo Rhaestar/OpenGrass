@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <iostream>
 
-void link_program(GLuint* pid, GLuint* shader_id);
+void link_program(GLuint* pid, GLuint* shader_id, int nb_shaders);
 
-GLuint make_program(std::string& vertex, std::string fragment);
+GLuint make_program(std::string& v, std::string& f, std::string tc, 
+        std::string te, std::string g);

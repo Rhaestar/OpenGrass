@@ -14,8 +14,8 @@ class Plane
 public:
     Plane(float scale_, std::string& vertex, std::string& fragment,
             std::string& grassVertex, std::string grassFragment,
-            std::string& tesselation, std::string& geometry,
-            std::string& texture);
+            std::string& tesselControl, std::string& tesselEval,
+            std::string& geometry, std::string& texture);
 
     void render();
     void init_vao();

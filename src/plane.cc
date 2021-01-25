@@ -2,13 +2,14 @@
 
 Plane::Plane(float scale_, std::string& vertex, std::string& fragment,
         std::string& grassVertex, std::string grassFragment,
-        std::string& tesselation, std::string& geometry,
-        std::string& texture)
+        std::string& tesselControl, std::string& tesselEval,
+        std::string& geometry, std::string& texture)
     : scale(scale_)
 {
-    plane_pid = make_program(vertex, fragment);
-    //    grass_pid = make_program(grassVertex, grassFragment);
-    //
+    plane_pid = make_program(vertex, fragment, "", "", "");
+    grass_pid = make_program(grassVertex, grassFragment, tesselControl,
+      tesselEval, geometry);
+    
     std::vector<unsigned char> image;
     unsigned width, height;
     unsigned error = lodepng::decode(image, width, height, texture);
@@ -62,11 +63,15 @@ void Plane::render()
     glClear(GL_COLOR_BUFFER_BIT);
     glBindTexture(GL_TEXTURE_2D, texture_id); TEST_OPENGL_ERROR();
     glBindVertexArray(vao_id); TEST_OPENGL_ERROR();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, 6); TEST_OPENGL_ERROR();
 
     //Draw grass
-    //glUseProgram(grass_pid); TEST_OPENGL_ERROR();
-    //glDrawArrays(GL_TRIANGLES, 0, 6); TEST_OPENGL_ERROR();
+    glUseProgram(grass_pid); TEST_OPENGL_ERROR();
+    glBindVertexArray(vao_id); TEST_OPENGL_ERROR();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //A enlever, juste pour afficher les arêtes
+    glDrawArrays(GL_PATCHES, 0, 6); TEST_OPENGL_ERROR();
+    glPatchParameteri(GL_PATCH_VERTICES, 3); TEST_OPENGL_ERROR();
 
     glBindVertexArray(0); TEST_OPENGL_ERROR();
 

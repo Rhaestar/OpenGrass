@@ -88,14 +88,16 @@ int main(int argc, char* argv[])
     init_GL();
     std::string vertex_src = load("shaders/Vertex.shd");
     std::string fragment_src = load("shaders/Fragment.shd");
-    std::string grass_vertex_src = "";
-    std::string grass_fragment_src = "";
-    std::string grass_tessel_src = "";
+    std::string grass_vertex_src = load("shaders/GrassVertex.shd");
+    std::string grass_fragment_src = load("shaders/GrassFragment.shd");
+    std::string grass_tessel_control_src = load("shaders/GrassTesselControl.shd");
+    std::string grass_tessel_eval_src = load("shaders/GrassTesselEval.shd");
     std::string grass_geo_src = "";
     std::string texture_path = "textures/grass32.png";
 
     plane = new Plane{1, vertex_src, fragment_src, grass_vertex_src,
-            grass_fragment_src, grass_tessel_src, grass_geo_src, texture_path};
+            grass_fragment_src, grass_tessel_control_src, grass_tessel_eval_src,
+            grass_geo_src, texture_path};
 
     plane->init_vao();
 

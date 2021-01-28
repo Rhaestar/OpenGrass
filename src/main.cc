@@ -103,6 +103,11 @@ int main(int argc, char* argv[])
     std::string grass_tessel_eval_src = load("shaders/GrassTesselEval.tese");
     std::string grass_geo_src = load("shaders/GrassGeometryWind.geom");
     std::string noise_path = "textures/noise32.png";
+    
+    // Print max tesselation level number 
+    GLint maxTessLevel;
+    glGetIntegerv(GL_MAX_TESS_GEN_LEVEL, &maxTessLevel);
+    std::cout << "Max tesselation level: " << maxTessLevel << "\n";
 
     plane = new Plane{vertex_src, fragment_src, grass_vertex_src,
             grass_fragment_src, grass_tessel_control_src, grass_tessel_eval_src,

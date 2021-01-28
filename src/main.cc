@@ -20,7 +20,7 @@ void window_resize(int width, int height) {
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
 //  RENDER HERE
-    plane->render();
+    plane->render(1000.f/60.f);
     glutSwapBuffers();
 }
 
@@ -31,18 +31,25 @@ void timer(int) {
     glutTimerFunc(1000/60, timer, 0);
 }
 
+void keyboard(unsigned char key, int x, int y)
+{
+    plane->translate(key);
+}
+
 void init_glut(int &argc, char *argv[]) {
     //glewExperimental = GL_TRUE;
     glutInit(&argc, argv);
     glutInitContextVersion(4,5);
     glutInitContextProfile(GLUT_CORE_PROFILE | GLUT_DEBUG);
-    glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH);
+    glutSetOption(GLUT_MULTISAMPLE, 8);
+    glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH|GLUT_MULTISAMPLE);
     glutInitWindowSize(1024, 1024);
     glutInitWindowPosition ( 100, 100 );
     glutCreateWindow("Grassy grass");
     glutDisplayFunc(display);
     glutTimerFunc(1000/60, timer, 0);
     glutReshapeFunc(window_resize);
+    glutKeyboardFunc(keyboard);
 }
 
 bool init_glew() {
@@ -57,8 +64,10 @@ void init_GL() {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);TEST_OPENGL_ERROR();
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(0.4,0.4,0.4,1.0);TEST_OPENGL_ERROR();
+    glClearColor(0.2,0.2,0.2,1.0);TEST_OPENGL_ERROR();
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
     glPixelStorei(GL_PACK_ALIGNMENT,1);
 }
@@ -86,18 +95,19 @@ int main(int argc, char* argv[])
     init_glut(argc, argv);
     init_glew();
     init_GL();
-    std::string vertex_src = load("shaders/Vertex.shd");
-    std::string fragment_src = load("shaders/Fragment.shd");
-    std::string grass_vertex_src = load("shaders/GrassVertex.shd");
-    std::string grass_fragment_src = load("shaders/GrassFragment.shd");
-    std::string grass_tessel_control_src = load("shaders/GrassTesselControl.shd");
-    std::string grass_tessel_eval_src = load("shaders/GrassTesselEval.shd");
-    std::string grass_geo_src = "";
+    std::string vertex_src = load("shaders/Vertex.vert");
+    std::string fragment_src = load("shaders/Fragment.frag");
+    std::string grass_vertex_src = load("shaders/GrassVertex.vert");
+    std::string grass_fragment_src = load("shaders/GrassFragment.frag");
+    std::string grass_tessel_control_src = load("shaders/GrassTesselControl.tesc");
+    std::string grass_tessel_eval_src = load("shaders/GrassTesselEval.tese");
+    std::string grass_geo_src = load("shaders/GrassGeometryWind.geom");
     std::string texture_path = "textures/grass32.png";
+    std::string noise_path = "textures/noise32.png";
 
     plane = new Plane{1, vertex_src, fragment_src, grass_vertex_src,
             grass_fragment_src, grass_tessel_control_src, grass_tessel_eval_src,
-            grass_geo_src, texture_path};
+            grass_geo_src, texture_path, noise_path};
 
     plane->init_vao();
 

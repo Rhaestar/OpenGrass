@@ -62,15 +62,16 @@ GLuint make_program(std::string& v, std::string& f, std::string tc,
     {
         shader_ids[2] = glCreateShader(GL_TESS_CONTROL_SHADER);
         shader_ids[3] = glCreateShader(GL_TESS_EVALUATION_SHADER);
-        //shader_ids[4] = glCreateShader(GL_GEOMETRY_SHADER);
+        shader_ids[4] = glCreateShader(GL_GEOMETRY_SHADER);
         
         glShaderSource(shader_ids[2], 1, (const GLchar**)&(tess_control_src), 0);
         glShaderSource(shader_ids[3], 1, (const GLchar**)&(tess_eval_src), 0);
-        //glShaderSource(shader_ids[4], 1, (const GLchar**)&(geometry_src), 0);
+        glShaderSource(shader_ids[4], 1, (const GLchar**)&(geometry_src), 0);
 
     }
 
     GLint compile_status = GL_TRUE;
+    std::cout << nb_shaders << "\n";
     for (int i = 0; i < nb_shaders; ++i)
     {
         glCompileShader(shader_ids[i]);
@@ -95,10 +96,10 @@ GLuint make_program(std::string& v, std::string& f, std::string tc,
             {
                 free(tess_control_src);
                 free(tess_eval_src);
-                //free(geometry_src);
+                free(geometry_src);
                 glDeleteShader(shader_ids[2]);
                 glDeleteShader(shader_ids[3]);
-                //glDeleteShader(shader_ids[4]);
+                glDeleteShader(shader_ids[4]);
             }
             return 0;
         }
@@ -109,7 +110,7 @@ GLuint make_program(std::string& v, std::string& f, std::string tc,
     {
         free(tess_control_src);
         free(tess_eval_src);
-        //free(geometry_src);
+        free(geometry_src);
     }
     link_program(&pid, shader_ids, nb_shaders);
     return pid;

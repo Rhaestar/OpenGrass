@@ -71,7 +71,6 @@ GLuint make_program(std::string& v, std::string& f, std::string tc,
     }
 
     GLint compile_status = GL_TRUE;
-    std::cout << nb_shaders << "\n";
     for (int i = 0; i < nb_shaders; ++i)
     {
         glCompileShader(shader_ids[i]);

@@ -1,31 +1,20 @@
 #include "plane.hh"
 
-Plane::Plane(float scale_, std::string& vertex, std::string& fragment,
+Plane::Plane(std::string& vertex, std::string& fragment,
         std::string& grassVertex, std::string grassFragment,
         std::string& tesselControl, std::string& tesselEval,
-        std::string& geometry, std::string& texture, std::string& noise)
-    : scale(scale_)
+        std::string& geometry, std::string& noise)
 {
+
+    //Create programs
     plane_pid = make_program(vertex, fragment, "", "", "");
     grass_pid = make_program(grassVertex, grassFragment, tesselControl,
       tesselEval, geometry);
-    
+   
+    //Load Noise texture
     std::vector<unsigned char> image;
     unsigned width, height;
-    unsigned error = lodepng::decode(image, width, height, texture);
-
-
-    glGenTextures(1, &texture_id); TEST_OPENGL_ERROR();
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]); TEST_OPENGL_ERROR();
-
-    std::vector<unsigned char> image2;
-    error = lodepng::decode(image2, width, height, noise);
-
+    lodepng::decode(image, width, height, noise);
 
     glGenTextures(1, &noise_id); TEST_OPENGL_ERROR();
     glBindTexture(GL_TEXTURE_2D, noise_id);
@@ -33,47 +22,58 @@ Plane::Plane(float scale_, std::string& vertex, std::string& fragment,
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image2[0]); TEST_OPENGL_ERROR();
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]); TEST_OPENGL_ERROR();
 
+    //Compute base camera
     cameraPos = glm::vec3(0.f, 0.3f, -1.2f);
     cameraFront = glm::normalize(glm::vec3(0.f, -1.f, 10.f));
     cameraUp = glm::normalize(glm::vec3(0.f, 20.f, 2.f));
     cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
     
+    //Set-up Wind
     time = 0.0;
     isWindy = false;
+    isWave = 0.f;
 }
 
+//Handle user inputs (and wind activation)
 void Plane::translate(unsigned char key)
 {
+    const float camera_speed = 0.02f;
     switch(key)
     {
     case 'z':
-        cameraPos += 0.02f * cameraFront;
+        cameraPos += camera_speed * cameraFront;
         break;
     case 's':
-        cameraPos -= 0.02f * cameraFront;
+        cameraPos -= camera_speed * cameraFront;
         break;
     case 'a':
-        cameraPos += 0.02f * cameraUp;
+        cameraPos += camera_speed * cameraUp;
         break;
     case 'e':
-        cameraPos -= 0.02f * cameraUp;
+        cameraPos -= camera_speed * cameraUp;
         break;
     case 'q':
-        cameraPos -= 0.02f * cameraRight;
+        cameraPos -= camera_speed * cameraRight;
         break;
     case 'd':
-        cameraPos += 0.02f * cameraRight;
+        cameraPos += camera_speed * cameraRight;
         break;
     case 'w':
         isWindy = !isWindy;
         break;
+    case 'x':
+        if (isWave > 0.5f)
+            isWave = 0.f;
+        else
+            isWave = 1.f;
     default:
         break;
     }
 }
 
+//Generate basic plane from two triangles
 void Plane::init_vao()
 {
     static float quadpos[12] = {1.0f,  1.0f,
@@ -97,10 +97,13 @@ void Plane::init_vao()
 
 void Plane::render(float deltatime)
 {
+    //Update wind and camera
     if (isWindy)
         time += deltatime;
+
     projection = glm::perspective(glm::radians(60.f), glutGet(GLUT_WINDOW_WIDTH) / (float)(glutGet(GLUT_WINDOW_HEIGHT)), 0.1f, 100.f);
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, glm::normalize(cameraUp));
+
     //Draw plane
     glUseProgram(plane_pid); TEST_OPENGL_ERROR();
 
@@ -110,7 +113,6 @@ void Plane::render(float deltatime)
     glUniformMatrix4fv(projid, 1, GL_FALSE, glm::value_ptr(projection)); TEST_OPENGL_ERROR();
 
     glClear(GL_COLOR_BUFFER_BIT);
-    glBindTexture(GL_TEXTURE_2D, texture_id); TEST_OPENGL_ERROR();
     glBindVertexArray(vao_id); TEST_OPENGL_ERROR();
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, 6); TEST_OPENGL_ERROR();
@@ -124,6 +126,8 @@ void Plane::render(float deltatime)
     glUniformMatrix4fv(projid, 1, GL_FALSE, glm::value_ptr(projection)); TEST_OPENGL_ERROR();
     GLint windid = glGetUniformLocation(grass_pid, "time"); TEST_OPENGL_ERROR();
     glUniform1f(windid, time);
+    GLint waveid = glGetUniformLocation(grass_pid, "wave"); TEST_OPENGL_ERROR();
+    glUniform1f(waveid, isWave);
 
     glBindTexture(GL_TEXTURE_2D, noise_id); TEST_OPENGL_ERROR();
     glBindVertexArray(vao_id); TEST_OPENGL_ERROR();

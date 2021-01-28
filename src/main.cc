@@ -25,13 +25,11 @@ void display() {
 }
 
 void timer(int) {
-// UPDATEHERE (IF NEEDED)
-// vfx->update_vbo(unsigned(1000/60));
     glutPostRedisplay();
     glutTimerFunc(1000/60, timer, 0);
 }
 
-void keyboard(unsigned char key, int x, int y)
+void keyboard(unsigned char key, int, int)
 {
     plane->translate(key);
 }
@@ -41,6 +39,8 @@ void init_glut(int &argc, char *argv[]) {
     glutInit(&argc, argv);
     glutInitContextVersion(4,5);
     glutInitContextProfile(GLUT_CORE_PROFILE | GLUT_DEBUG);
+
+    //Enable Multisampling for less aliasing
     glutSetOption(GLUT_MULTISAMPLE, 8);
     glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH|GLUT_MULTISAMPLE);
     glutInitWindowSize(1024, 1024);
@@ -102,12 +102,11 @@ int main(int argc, char* argv[])
     std::string grass_tessel_control_src = load("shaders/GrassTesselControl.tesc");
     std::string grass_tessel_eval_src = load("shaders/GrassTesselEval.tese");
     std::string grass_geo_src = load("shaders/GrassGeometryWind.geom");
-    std::string texture_path = "textures/grass32.png";
     std::string noise_path = "textures/noise32.png";
 
-    plane = new Plane{1, vertex_src, fragment_src, grass_vertex_src,
+    plane = new Plane{vertex_src, fragment_src, grass_vertex_src,
             grass_fragment_src, grass_tessel_control_src, grass_tessel_eval_src,
-            grass_geo_src, texture_path, noise_path};
+            grass_geo_src, noise_path};
 
     plane->init_vao();
 
